@@ -15,6 +15,8 @@ and so far:
 - add functions for the different outputs available on the website
   - the original code runs the different outputs as cases:  https://github.com/dhall-lang/dhall-haskell/blob/master/dhall-try/src/Main.hs
     but I initially stripped them out of this repo for simplicity
+    
+Also it doesn't build unless it's re-inserted as a subdirectory of `dhall-haskell` :D
 
 
 
