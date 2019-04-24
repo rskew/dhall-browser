@@ -1,4 +1,4 @@
-The interactive Dhall example from dhall-lang.org uses GHCJS to add
+The interactive Dhall example from https://dhall-lang.org uses GHCJS to add
 dhall-haskell functionality to a webpage. Because it registers Haskell
 functions as callbacks directly, the functions aren't neatly exposed
 to the JS environment, making it difficult to build more logic
