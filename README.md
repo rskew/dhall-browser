@@ -1,4 +1,24 @@
-# `dhall-try`
+The interactive Dhall example from dhall-lang.org uses GHCJS to add
+dhall-haskell functionality to a webpage. Because it registers Haskell
+functions as callbacks directly, the functions aren't neatly exposed
+to the JS environment, making it difficult to build more logic
+and interactivity to writing Dhall in a browser.
+
+I Frankensteined the original code with this example of calling
+Haskell functions from JS https://github.com/dc25/ghcjsCallback
+and so far:
+- `js_getHello` will compile a Dhall expression JSON
+- `parsableDhall` will return `true` if the input string is valid Dhall.
+
+### TODO: 
+- add function for typechecking a Dhall expression
+- add functions for the different outputs available on the website
+  - the original code runs the different outputs as cases:  https://github.com/dhall-lang/dhall-haskell/blob/master/dhall-try/src/Main.hs
+    but I initially stripped them out of this repo for simplicity
+
+
+
+# Original readme for `dhall-try` from https://github.com/dhall-lang/dhall-haskell/tree/master/dhall-try
 
 For installation or development instructions, see:
 
