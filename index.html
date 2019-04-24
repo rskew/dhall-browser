@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>The Dhall configuration language</title>
+    <meta name="description" content="A non-repetitive alternative to YAML">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      #title {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #editor {
+        text-align: center;
+      }
+
+      #input-pane {
+        overflow: auto;
+        width: 60ch !important;
+        display: inline-block;
+      }
+
+      #output-pane {
+        overflow: auto;
+        width: 60ch !important;
+        display: inline-block;
+      }
+
+      .CodeMirror {
+        margin-bottom: 20px;
+        outline: 1px solid black;
+        height: 24rem !important;
+        text-align: start;
+      }
+
+      .nav-link {
+        outline: 0;
+      }
+
+      .navbar span {
+        margin-left: 7px;
+      }
+
+      .fas {
+        margin-left: 5px;
+      }
+
+      .navbar {
+        margin-bottom: 20px;
+        border-bottom: 1px solid black;
+      }
+
+      header {
+        margin-bottom: 2rem;
+      }
+    </style>
+    <link rel="stylesheet" href="./css/codemirror.css">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/solid.css" integrity="sha384-aj0h5DVQ8jfwc8DA7JiM+Dysv7z+qYrFYZR+Qd/TwnmpDI6UaB3GJRRTdY8jYGS4" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/fontawesome.css" integrity="sha384-WK8BzK0mpgOdhCxq86nInFqSWLzR5UAsNg0MGX9aDaIIrFWQ38dGdhwnNCAoXFxL" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-left" href="https://dhall-lang.org"><img src="./img/dhall-large-logo.png" height="31px" alt="Dhall logo"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item mr-3 my-auto"><a href="https://github.com/dhall-lang/dhall-lang/wiki/Getting-started%3A-Generate-JSON-or-YAML" class="btn btn-primary">Get Started <i class="fas fa-running"></i></a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="discussionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Discussion
+            </a>
+            <div class="dropdown-menu" aria-labelledby="discussionDropdown">
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Programmable-configuration-files">Programmable configuration files</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Core-language-features">Core language features</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Safety-guarantees">Safety guarantees</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Dhall-in-production">Dhall in production</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="tutorialDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Tutorial
+            </a>
+            <div class="dropdown-menu" aria-labelledby="tutorialDropdown">
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Getting-started%3A-Generate-JSON-or-YAML">Getting started: Generate JSON or YAML</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-nethack"><code>dhall-nethack</code></a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="howtoDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              How-to guides
+            </a>
+            <div class="dropdown-menu" aria-labelledby="howtoDropdown">
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Cheatsheet">Cheatsheet</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Frequently-Asked-Questions-%28FAQ%29">Frequently Asked Questions (FAQ)</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/How-to-translate-recursive-code-to-Dhall">How to translate recursive code to Dhall</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/How-to-add-a-new-built-in-function">How to add a new built-in function</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/How-to-type-check-and-normalize-incomplete-code">How to type-check and normalize incomplete code</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="referencesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              References
+            </a>
+            <div class="dropdown-menu" aria-labelledby="referencesDropdown">
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/blob/master/standard/dhall.abnf">Grammar</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/blob/master/standard/semantics.md">Semantics</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/wiki/Built-in-types%2C-functions%2C-and-operators">Built-in types, functions, and operators</a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://prelude.dhall-lang.org/">Prelude</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="integrationsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Integrations
+            </a>
+            <div class="dropdown-menu" aria-labelledby="integrationsDropdown">
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-haskell/blob/master/dhall-json/README.md"><img src = "./img/yaml-logo.png" height="20px" alt="YAML logo"><span>YAML</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-haskell/blob/master/dhall-json/README.md"><img src = "./img/json-logo.svg" height="32px" alt="JSON logo"><span>JSON</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-kubernetes/blob/master/README.md"><img src = "./img/kubernetes-logo.svg" height="32px" alt="Kubernetes logo"><span>Kubernetes</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-haskell/blob/master/dhall-bash/README.md"><img src = "./img/bash-logo.png" height="32px" alt="Bash logo"><span>Bash</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/f-f/dhall-clj/blob/master/README.md"><img src = "./img/clojure-logo.svg" height="32px" alt="Clojure logo"><span>Clojure</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-haskell/blob/master/dhall/README.md"><img src = "./img/haskell-logo.png" height="32px" alt="Haskell logo"><span>Haskell</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://github.com/dhall-lang/dhall-nix/blob/master/README.md"><img src = "./img/nix-logo.png" height="32px" alt="Nix logo"><span>Nix</span></a>
+              <div class="dropdown-divider"></div>
+              <a class="nav-link" href="https://git.sr.ht/~singpolyma/dhall-ruby"><img src = "./img/ruby-logo.svg" height="32px" alt="Ruby logo"><span>Ruby</span></a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/dhall-lang/dhall-lang/blob/master/README.md"><img src = "./img/github-logo.png" height="25px" alt="GitHub logo"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://twitter.com/dhall_lang"><img src = "./img/twitter-logo.svg" height="32px" alt="Twitter logo"></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://discourse.dhall-lang.org"><img src = "./img/discourse-logo.svg" height="25px" alt="Discourse logo"></a>
+          </li>
+          <li class="nav-item">
+          <li class="nav-item">
+            <a class="nav-link" href="https://stackoverflow.com/questions/tagged/dhall"><img src = "./img/stack-overflow-logo.svg" height="32px" alt="Stack Overflow logo"></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <header>
+    <h1 class="text-center">The Dhall configuration language</h1>
+    <p class="text-center">The non-repetitive alternative to YAML</p>
+    </header>
+    <div id="editor">
+      <div id="input-pane">
+        <ul class="nav nav-tabs example-tab">
+          <li class="nav-item">
+            <a id="example0" class="nav-link example-tab active" href="#" onClick="set(example0, 'example0')">Hello, world!</a>
+          </li>
+          <li class="nav-item">
+            <a id="example1" class="nav-link example-tab" href="#" onClick="set(example1, 'example1')">Definitions</a>
+          </li>
+          <li class="nav-item">
+            <a id="example2" class="nav-link example-tab" href="#" onClick="set(example2, 'example2')">Functions</a>
+          </li>
+          <li class="nav-item">
+            <a id="example3" class="nav-link example-tab" href="#" onClick="set(example3, 'example3')">Types</a>
+          </li>
+          <li class="nav-item">
+            <a id="example4" class="nav-link example-tab" href="#" onClick="set(example4, 'example4')">Imports</a>
+          </li>
+        </ul>
+        <textarea id="dhall-input"></textarea>
+      </div>
+      <div id="output-pane">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a id="type-tab" class="nav-link mode-tab" href="#">Type</a>
+          </li>
+          <li class="nav-item">
+            <a id="dhall-tab" class="nav-link mode-tab" href="#">Normalized</a>
+          </li>
+          <li class="nav-item">
+            <a id="json-tab" class="nav-link mode-tab" href="#">JSON</a>
+          </li>
+          <li class="nav-item">
+            <a id="yaml-tab" class="nav-link mode-tab active" href="#">YAML</a>
+          </li>
+        </ul>
+        <textarea id="dhall-output"></textarea>
+      </div>
+    </div>
+    <div class="container jumbotron" style="background-color: #c5eccf">
+      <h1 class="display-4">Human-friendly</h1>
+      <p class="lead">Dhall supports comments, multi-line string literals and
+      string interpolation with non-technical users in mind.</p>
+      <textarea id="highlight0"></textarea>
+      <p>You can also automatically remove all indirection in any Dhall code,
+      converting the file to a logic-free normal form for non-programmers to
+      understand.</p>
+      <a href="https://github.com/dhall-lang/dhall-lang/wiki/Programmable-configuration-files"class="btn btn-lg btn-outline-dark bg-light">Learn More <i class="fas fa-book"></i></a>
+    </div>
+    <div class="container jumbotron" style="background-color: #fbecf1">
+      <h1 class="display-4">Turing-completeness is not a feature</h1>
+      <p class="lead">Dhall is programmable, but <b>NOT</b> Turing-complete.</p>
+      <hr class="my-4">
+      <p>We take language security seriously so that your Dhall programs
+      never fail, hang, crash, leak secrets, or compromise your system.</p>
+      <p>The language aims to support safely importing and evaluating untrusted
+      Dhall code, even code authored by malicious users.  We treat the inability
+      to do so as a specification bug.</p>
+      <a href="https://github.com/dhall-lang/dhall-lang/wiki/Safety-guarantees"class="btn btn-lg btn-outline-dark bg-light">Safety Guarantees<i class="fas fa-shield-alt"></i></a>
+    </div>
+    <div class="container jumbotron" style="background-color: #cfebfb">
+      <h1 class="display-4">Tough on messes</h1>
+      <p class="lead">Dhall is built for large and weird configuration
+      schemas.</p>
+      <hr class="my-4">
+      <p>Don't use YAML?  No problem!</p>
+      <p>Dhall can integrate with messy APIs and tools.  You can even convert
+      Dhall to ad-hoc and non-standard
+      configuration file formats.</p>
+      <a href="https://github.com/dhall-lang/dhall-nethack" class="btn btn-lg btn-outline-dark bg-light">See an Example <i class="fas fa-cogs"></i></a>
+    </div>
+    <div class="container jumbotron" style="background-color: #fbf3c8">
+      <h1 class="display-4">Tired of YAML?</h1>
+      <p class="lead">Dhall eliminates the YAML quirks that software engineers
+      dread.  The language standard learns from the mistakes of the past.</p>
+      <textarea id="highlight1"></textarea>
+      <p>You can also generate either YAML or JSON from Dhall configuration
+      files using tiny statically-linked binaries.  Dhall can cheaply fit right
+      in with your existing tools and infrastructure.</p>
+      <a href="https://github.com/dhall-lang/dhall-lang/wiki/Getting-started%3A-Generate-JSON-or-YAML" class="btn btn-lg btn-outline-dark bg-light">Get Started <i class="fas fa-running"></i></a>
+    </div>
+    <hr class="my-4">
+    <p class="text-center">This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+  </body>
+  <script language="javascript" src="./js/codemirror.js"></script>
+  <script language="javascript" src="./js/haskell.js"></script>
+  <script language="javascript" src="./js/yaml.js"></script>
+  <script language="javascript">
+    let dhallInput  = document.getElementById("dhall-input");
+
+    input = CodeMirror.fromTextArea(dhallInput, {
+      lineNumbers: true,
+      mode: "haskell"
+    });
+
+    let dhallOutput = document.getElementById("dhall-output");
+
+    output = CodeMirror.fromTextArea(dhallOutput, {
+      lineNumbers: true,
+      mode: "yaml",
+      readOnly: true
+    });
+
+    let highlight0 = document.getElementById("highlight0");
+
+    h0 = CodeMirror.fromTextArea(highlight0, {
+      lineNumbers: true,
+      mode: "haskell",
+      readOnly: true
+    });
+
+    let highlight1 = document.getElementById("highlight1");
+
+    h1 = CodeMirror.fromTextArea(highlight1, {
+      lineNumbers: true,
+      mode: "haskell",
+      readOnly: true
+    });
+  </script>
+  <script defer language="javascript" src="./js/jquery.min.js"></script>
+  <script defer language="javascript" src="./js/bootstrap.min.js"></script>
+  <script defer language="javascript" src="./js/javascript.js"></script>
+  <script defer language="javascript" src="./js/js-yaml.min.js"></script>
+  <script language="javascript">
+    let dhallTab    = document.getElementById("dhall-tab");
+    let typeTab     = document.getElementById("type-tab");
+    let jsonTab     = document.getElementById("json-tab");
+    let yamlTab     = document.getElementById("yaml-tab");
+
+    function selectTab(tabClass, tabId) {
+      Array.from(document.getElementsByClassName(tabClass)).forEach(element => {
+        element.classList.remove("active");
+      });
+      document.getElementById(tabId).classList.toggle("active");
+    }
+
+    /* The Haskell yaml package doesn't support GHCJS, so we simulate the
+       dhall-to-yaml conversion in the browser in two steps:
+
+       * Convert Dhall to JSON using the `dhall-to-json` Haskell package
+         compiled with GHCJS
+       * Convert JSON to YAML using the `jsyaml` JavaScript package (this
+         function)
+    */
+    function jsonToYaml(json) {
+      let obj =JSON.parse(json);
+      let str = jsyaml.safeDump(obj);
+      return str;
+    }
+
+    let example0 = `{- This is an example Dhall configuration file
+
+   Can you spot the mistake?
+
+   Fix the typo, then move onto the "Definitions" example
+-}
+
+{ home       = "/home/bill"
+, privateKey = "/home/bill/id_ed25519"
+, publicKey  = "/home/blil/id_ed25519.pub"
+}`
+
+    let example1 = `{- Don't repeat yourself!
+
+   Repetition is error-prone
+-}
+
+let user = "bill"
+in  { home       = "/home/\${user}"
+    , privateKey = "/home/\${user}/id_ed25519"
+    , publicKey  = "/home/\${user}/id_ed25519.pub"
+    }
+
+{- Change the name "bill" to "jane" -}`;
+
+    let example2 = `{- More than one user?  Use a function! -}
+
+let makeUser = \\(user : Text) ->
+      let home       = "/home/\${user}"
+      let privateKey = "\${home}/id_ed25519"
+      let publicKey  = "\${privateKey}.pub"
+      in  { home = home
+          , privateKey = privateKey
+          , publicKey = publicKey
+          }
+    {- Add another user to this list -}
+in  [ makeUser "bill"
+    , makeUser "jane"
+    ]`
+
+    let example3 = `{- You can optionally add types
+
+   \`x : T\` means that \`x\` has type \`T\`
+-}
+
+let Config : Type =
+      {- What happens if you add another field here? -}
+      { home : Text
+      , privateKey : Text
+      , publicKey : Text
+      }
+
+let makeUser : Text -> Config = \\(user : Text) ->
+      let home       : Text   = "/home/\${user}"
+      let privateKey : Text   = "\${home}/id_ed25519"
+      let publicKey  : Text   = "\${privateKey}.pub"
+      let config     : Config =
+            { home       = home
+            , privateKey = privateKey
+            , publicKey  = publicKey
+            }
+      in  config
+
+let configs : List Config =
+      [ makeUser "bill"
+      , makeUser "jane"
+      ]
+
+in  configs
+`;
+
+    let example4 = `{- Need to generate a lot of users?
+
+   Use the \`generate\` function from the Dhall Prelude
+-}
+
+let generate = https://prelude.dhall-lang.org/List/generate
+
+{- You can import Dhall expressions from URLs that support
+   CORS
+
+   The command-line tools also let you import from files,
+   environment variables, and URLs without CORS support.
+
+   Browse https://prelude.dhall-lang.org for more utilities
+-}
+
+let makeUser = \\(user : Text) ->
+      let home       = "/home/\${user}"
+      let privateKey = "\${home}/id_ed25519"
+      let publicKey  = "\${privateKey}.pub"
+      in  { home = home
+          , privateKey = privateKey
+          , publicKey = publicKey
+          }
+
+let buildUser = \\(index : Natural) ->
+      {- \`Natural/show\` is a "built-in", meaning that
+         you can use \`Natural/show\` without an import
+      -}
+      makeUser "build\${Natural/show index}"
+
+let Config =
+      { home : Text
+      , privateKey : Text
+      , publicKey : Text
+      }
+
+in  {- Try generating 20 users instead of 10 -}
+    generate 10 Config buildUser`
+
+    function set(example, tabId){
+      input.setValue(example);
+      selectTab("example-tab", tabId);
+    };
+
+    input.setValue(example0);
+
+    h0.setValue(`let input =
+      { relative = "daughter"
+      , movies   = [ "Boss Baby", "Frozen", "Moana" ]
+      }
+
+let concatSep = https://prelude.dhall-lang.org/Text/concatSep
+
+    -- Dhall strips leading indentation for you
+in  ''
+    My \${input.relative} loves to watch \${concatSep ", " input.movies}
+    
+    How about you?
+    ''`);
+
+    h1.setValue(`{ -- Unlike YAML, Dhall does not accept YES|NO|ON|OFF
+  validDhallBools = [ True, False ]
+    , someNumbers = [ 1
+  ,
+-- Dhall is not indentation-sensitive
+2, 3 ]
+  -- Field names that conflict with reserved identifiers must be quoted
+, \`True\` = True
+, version = "9.3"  {- Strings must be quoted
+
+                      All Dhall literals have unambiguous types -}
+}`);
+  </script>
+  <script defer language="javascript" src="./js/all.min.js"></script>
+</html>
